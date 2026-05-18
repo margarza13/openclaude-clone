@@ -1,14 +1,18 @@
 # OpenClaude Clone
 
-A Claude-inspired chat UI built with React and Tailwind CSS. Clean, dark-themed interface with multi-conversation support, powered by the Anthropic Claude API (or OpenAI).
+A Claude-inspired chat UI built with React and Tailwind CSS. Clean, dark-themed interface with multi-conversation support, streaming responses, markdown rendering, syntax highlighting, and model selection — powered by the Anthropic Claude API.
 
 ## ✨ Features
 
 - 💬 Multi-conversation sidebar (like Claude)
 - 🌙 Dark theme UI with smooth message bubbles
-- ⚡ Streaming-ready architecture
-- 🔑 API key prompt on first load (stored in browser session only)
-- 📱 Responsive layout
+- ⚡ Streaming responses — text appears word by word
+- 📝 Markdown rendering — bold, italics, lists, headings, blockquotes
+- 🎨 Syntax highlighting for code blocks (190+ languages via highlight.js)
+- 📋 Copy button on every code block
+- 🤖 Model selector — switch between Claude 3 Haiku, Sonnet, and Opus
+- 💾 Export any conversation as a Markdown file
+- 🔑 API key prompt on first load (stored in browser localStorage only)
 
 ## 🚀 Getting Started
 
@@ -57,37 +61,37 @@ openclaude-clone/
 │   └── index.html
 ├── src/
 │   ├── api/
-│   │   └── claude.js        # API adapter (Anthropic / OpenAI)
+│   │   └── claude.js            # Anthropic API adapter (streaming + non-streaming)
 │   ├── components/
-│   │   ├── Sidebar.jsx      # Conversation list sidebar
-│   │   ├── MessageBubble.jsx # Individual chat message
-│   │   ├── ChatInput.jsx    # Input bar with send button
-│   │   └── ApiKeyModal.jsx  # API key entry modal
+│   │   ├── Sidebar.jsx          # Conversation list sidebar
+│   │   ├── MessageBubble.jsx    # Chat message with markdown + syntax highlighting
+│   │   ├── ChatInput.jsx        # Input bar with send button
+│   │   ├── ApiKeyModal.jsx      # API key entry modal
+│   │   ├── ModelSelector.jsx    # Dropdown to switch Claude models
+│   │   └── ExportButton.jsx     # Export conversation as Markdown
 │   ├── hooks/
-│   │   └── useChat.js       # Chat state & logic
+│   │   └── useChat.js           # Chat state, streaming, model selection
 │   ├── pages/
-│   │   └── ChatPage.jsx     # Main chat page
+│   │   └── ChatPage.jsx         # Main chat page
 │   ├── styles/
-│   │   └── index.css        # Tailwind base styles
-│   ├── utils/               # Utility helpers (coming soon)
-│   └── App.jsx              # App router
+│   │   └── index.css            # Tailwind base styles
+│   └── App.jsx                  # App router
 ├── .env.example
 ├── tailwind.config.js
 └── package.json
 ```
 
-## 🔧 Switching to OpenAI
-
-Open `src/api/claude.js` and replace the fetch call with the OpenAI API endpoint and format. The hook and UI are model-agnostic.
-
 ## 📋 Roadmap
 
-- [ ] Streaming responses
-- [ ] Markdown rendering in messages
-- [ ] Code block syntax highlighting
-- [ ] Model selector (Claude 3 Haiku / Sonnet / Opus)
-- [ ] Export conversation as Markdown
+- [x] Multi-conversation sidebar
+- [x] Streaming responses
+- [x] Markdown rendering
+- [x] Syntax highlighting + copy button
+- [x] Model selector (Claude 3 Haiku / Sonnet / Opus)
+- [x] Export conversation as Markdown
 - [ ] Mobile responsive tweaks
+- [ ] Conversation search
+- [ ] System prompt customization
 
 ## 📄 License
 
