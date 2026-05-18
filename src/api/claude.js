@@ -1,6 +1,13 @@
 // Adapter for AI API calls (Anthropic Claude API) with streaming support
 
-export async function sendMessage(messages, apiKey, model = 'claude-3-5-sonnet-20241022') {
+export async function sendMessage(messages, apiKey, model = 'claude-3-5-sonnet-20241022', systemPrompt = '') {
+  const body = {
+    model,
+    max_tokens: 1024,
+    messages: messages.map(m => ({ role: m.role, content: m.content }))
+  };
+  if (systemPrompt) body.system = systemPrompt;
+
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -8,11 +15,7 @@ export async function sendMessage(messages, apiKey, model = 'claude-3-5-sonnet-2
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01'
     },
-    body: JSON.stringify({
-      model,
-      max_tokens: 1024,
-      messages: messages.map(m => ({ role: m.role, content: m.content }))
-    })
+    body: JSON.stringify(body)
   });
 
   if (!response.ok) throw new Error('API request failed');
@@ -20,7 +23,15 @@ export async function sendMessage(messages, apiKey, model = 'claude-3-5-sonnet-2
   return data.content[0].text;
 }
 
-export async function sendMessageStreaming(messages, apiKey, onChunk, model = 'claude-3-5-sonnet-20241022') {
+export async function sendMessageStreaming(messages, apiKey, onChunk, model = 'claude-3-5-sonnet-20241022', systemPrompt = '') {
+  const body = {
+    model,
+    max_tokens: 1024,
+    stream: true,
+    messages: messages.map(m => ({ role: m.role, content: m.content }))
+  };
+  if (systemPrompt) body.system = systemPrompt;
+
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -29,12 +40,7 @@ export async function sendMessageStreaming(messages, apiKey, onChunk, model = 'c
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-calls': 'true'
     },
-    body: JSON.stringify({
-      model,
-      max_tokens: 1024,
-      stream: true,
-      messages: messages.map(m => ({ role: m.role, content: m.content }))
-    })
+    body: JSON.stringify(body)
   });
 
   if (!response.ok) {
@@ -49,10 +55,8 @@ export async function sendMessageStreaming(messages, apiKey, onChunk, model = 'c
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
-
     const chunk = decoder.decode(value, { stream: true });
     const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
-
     for (const line of lines) {
       const data = line.slice(6).trim();
       if (data === '[DONE]') continue;
