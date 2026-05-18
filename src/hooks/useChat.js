@@ -9,6 +9,7 @@ export function useChat() {
   const [activeId, setActiveId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [model, setModel] = useState('claude-3-5-sonnet-20241022');
+  const [systemPrompt, setSystemPrompt] = useState('');
 
   const activeConversation = conversations.find(c => c.id === activeId) || conversations[0];
 
@@ -41,7 +42,6 @@ export function useChat() {
 
     try {
       const allMessages = [...activeConversation.messages, userMsg];
-
       await sendMessageStreaming(allMessages, apiKey, (streamedText) => {
         setConversations(prev => prev.map(c =>
           c.id === currentConvId
@@ -53,7 +53,7 @@ export function useChat() {
               }
             : c
         ));
-      }, model);
+      }, model, systemPrompt);
     } catch (e) {
       console.error('Streaming error:', e);
       setConversations(prev => prev.map(c =>
@@ -71,7 +71,12 @@ export function useChat() {
     } finally {
       setLoading(false);
     }
-  }, [activeConversation, activeId, conversations, model]);
+  }, [activeConversation, activeId, conversations, model, systemPrompt]);
 
-  return { conversations, activeConversation, setActiveId, newChat, sendUserMessage, loading, model, setModel };
+  return {
+    conversations, activeConversation, setActiveId, newChat,
+    sendUserMessage, loading,
+    model, setModel,
+    systemPrompt, setSystemPrompt
+  };
 }
