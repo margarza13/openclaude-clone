@@ -1,6 +1,6 @@
 // Adapter for AI API calls (Anthropic Claude API) with streaming support
 
-export async function sendMessage(messages, apiKey) {
+export async function sendMessage(messages, apiKey, model = 'claude-3-5-sonnet-20241022') {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -9,7 +9,7 @@ export async function sendMessage(messages, apiKey) {
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: 'claude-3-5-sonnet-20241022',
+      model,
       max_tokens: 1024,
       messages: messages.map(m => ({ role: m.role, content: m.content }))
     })
@@ -20,7 +20,7 @@ export async function sendMessage(messages, apiKey) {
   return data.content[0].text;
 }
 
-export async function sendMessageStreaming(messages, apiKey, onChunk) {
+export async function sendMessageStreaming(messages, apiKey, onChunk, model = 'claude-3-5-sonnet-20241022') {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -30,7 +30,7 @@ export async function sendMessageStreaming(messages, apiKey, onChunk) {
       'anthropic-dangerous-direct-browser-calls': 'true'
     },
     body: JSON.stringify({
-      model: 'claude-3-5-sonnet-20241022',
+      model,
       max_tokens: 1024,
       stream: true,
       messages: messages.map(m => ({ role: m.role, content: m.content }))
