@@ -4,6 +4,7 @@ import MessageBubble from '../components/MessageBubble';
 import ChatInput from '../components/ChatInput';
 import ApiKeyModal from '../components/ApiKeyModal';
 import ModelSelector from '../components/ModelSelector';
+import ExportButton from '../components/ExportButton';
 import { useChat } from '../hooks/useChat';
 
 export default function ChatPage() {
@@ -31,11 +32,14 @@ export default function ChatPage() {
       />
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="px-6 py-3 border-b border-[#0f3460] flex items-center justify-between">
-          <span className="text-white font-semibold text-lg truncate">
+        <div className="px-6 py-3 border-b border-[#0f3460] flex items-center justify-between gap-3">
+          <span className="text-white font-semibold text-lg truncate flex-1">
             {activeConversation?.title || 'New Chat'}
           </span>
-          <ModelSelector model={model} onChange={setModel} />
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <ExportButton conversation={activeConversation} />
+            <ModelSelector model={model} onChange={setModel} />
+          </div>
         </div>
 
         {/* Messages */}
@@ -44,7 +48,9 @@ export default function ChatPage() {
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <div className="text-5xl mb-4">✦</div>
               <p className="text-xl font-semibold text-gray-400">How can I help you today?</p>
-              <p className="text-sm text-gray-600 mt-1">Using {model.includes('haiku') ? 'Claude 3 Haiku' : model.includes('opus') ? 'Claude 3 Opus' : 'Claude 3.5 Sonnet'}</p>
+              <p className="text-sm text-gray-600 mt-1">
+                Using {model.includes('haiku') ? 'Claude 3 Haiku' : model.includes('opus') ? 'Claude 3 Opus' : 'Claude 3.5 Sonnet'}
+              </p>
             </div>
           )}
           {activeConversation?.messages.map(msg => (
