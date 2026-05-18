@@ -5,12 +5,20 @@ import ChatInput from '../components/ChatInput';
 import ApiKeyModal from '../components/ApiKeyModal';
 import ModelSelector from '../components/ModelSelector';
 import ExportButton from '../components/ExportButton';
+import SystemPromptModal from '../components/SystemPromptModal';
 import { useChat } from '../hooks/useChat';
 
 export default function ChatPage() {
-  const { conversations, activeConversation, setActiveId, newChat, sendUserMessage, loading, model, setModel } = useChat();
+  const {
+    conversations, activeConversation, setActiveId, newChat,
+    sendUserMessage, loading,
+    model, setModel,
+    systemPrompt, setSystemPrompt
+  } = useChat();
+
   const [apiKey, setApiKey] = useState(localStorage.getItem('oc_api_key') || '');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [systemPromptOpen, setSystemPromptOpen] = useState(false);
   const bottomRef = useRef(null);
 
   const handleSaveKey = (key) => {
@@ -35,6 +43,13 @@ export default function ChatPage() {
   return (
     <div className="flex h-screen bg-[#1a1a2e] overflow-hidden">
       {!apiKey && <ApiKeyModal onSave={handleSaveKey} />}
+      {systemPromptOpen && (
+        <SystemPromptModal
+          systemPrompt={systemPrompt}
+          onSave={setSystemPrompt}
+          onClose={() => setSystemPromptOpen(false)}
+        />
+      )}
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
@@ -56,13 +71,15 @@ export default function ChatPage() {
           activeId={activeConversation?.id}
           onSelect={handleSelect}
           onNew={handleNew}
+          systemPrompt={systemPrompt}
+          onOpenSystemPrompt={() => { setSystemPromptOpen(true); setSidebarOpen(false); }}
         />
       </div>
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <div className="px-4 md:px-6 py-3 border-b border-[#0f3460] flex items-center gap-3">
+        <div className="px-4 md:px-6 py-3 border-b border-[#0f3460] flex items-center gap-2 md:gap-3">
           {/* Mobile hamburger */}
           <button
             className="md:hidden flex-shrink-0 text-gray-400 hover:text-white transition p-1"
@@ -78,7 +95,16 @@ export default function ChatPage() {
             {activeConversation?.title || 'New Chat'}
           </span>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+            {/* System prompt indicator + button (desktop) */}
+            <button
+              onClick={() => setSystemPromptOpen(true)}
+              title="System prompt"
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0f3460] hover:bg-[#0f3460]/80 text-sm transition"
+            >
+              <span className={`w-2 h-2 rounded-full ${systemPrompt ? 'bg-green-400' : 'bg-gray-600'}`} />
+              <span className="text-white">Prompt</span>
+            </button>
             <ExportButton conversation={activeConversation} />
             <ModelSelector model={model} onChange={setModel} />
           </div>
@@ -91,8 +117,16 @@ export default function ChatPage() {
               <div className="text-4xl md:text-5xl mb-4">✦</div>
               <p className="text-lg md:text-xl font-semibold text-gray-400">How can I help you today?</p>
               <p className="text-sm text-gray-600 mt-1">
-                Using {model.includes('haiku') ? 'Claude 3 Haiku' : model.includes('opus') ? 'Claude 3 Opus' : 'Claude 3.5 Sonnet'}
+                {systemPrompt ? '🟢 Custom system prompt active' : `Using ${model.includes('haiku') ? 'Claude 3 Haiku' : model.includes('opus') ? 'Claude 3 Opus' : 'Claude 3.5 Sonnet'}`}
               </p>
+              {/* Mobile system prompt button */}
+              <button
+                onClick={() => setSystemPromptOpen(true)}
+                className="md:hidden mt-4 flex items-center gap-2 px-4 py-2 rounded-xl bg-[#16213e] border border-[#0f3460] text-gray-400 hover:text-white text-sm transition"
+              >
+                <span className={`w-2 h-2 rounded-full ${systemPrompt ? 'bg-green-400' : 'bg-gray-600'}`} />
+                {systemPrompt ? 'Edit system prompt' : 'Set system prompt'}
+              </button>
             </div>
           )}
           {activeConversation?.messages.map(msg => (
@@ -100,7 +134,7 @@ export default function ChatPage() {
           ))}
           {loading && activeConversation?.messages[activeConversation.messages.length - 1]?.content === '' && (
             <div className="flex justify-start mb-4">
-              <div className="w-8 h-8 rounded-full bg-[#e94560] flex items-center justify-center text-white text-xs font-bold mr-2 flex-shrink-0">A</div>
+              <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#e94560] flex items-center justify-center text-white text-xs font-bold mr-2 flex-shrink-0">A</div>
               <div className="bg-[#16213e] px-4 py-3 rounded-2xl rounded-tl-sm text-gray-400 text-sm animate-pulse">Thinking...</div>
             </div>
           )}
