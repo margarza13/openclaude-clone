@@ -8,6 +8,7 @@ export function useChat() {
   ]);
   const [activeId, setActiveId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [model, setModel] = useState('claude-3-5-sonnet-20241022');
 
   const activeConversation = conversations.find(c => c.id === activeId) || conversations[0];
 
@@ -20,10 +21,10 @@ export function useChat() {
   const sendUserMessage = useCallback(async (content, apiKey) => {
     const userMsg = { id: uuidv4(), role: 'user', content };
     const assistantMsgId = uuidv4();
+    const currentConvId = activeId || conversations[0].id;
 
-    // Add user message + empty assistant message placeholder
     setConversations(prev => prev.map(c =>
-      c.id === (activeId || conversations[0].id)
+      c.id === currentConvId
         ? {
             ...c,
             title: c.messages.length === 0 ? content.slice(0, 30) : c.title,
@@ -42,9 +43,8 @@ export function useChat() {
       const allMessages = [...activeConversation.messages, userMsg];
 
       await sendMessageStreaming(allMessages, apiKey, (streamedText) => {
-        // Update assistant message content as chunks arrive
         setConversations(prev => prev.map(c =>
-          c.id === (activeId || conversations[0].id)
+          c.id === currentConvId
             ? {
                 ...c,
                 messages: c.messages.map(m =>
@@ -53,11 +53,11 @@ export function useChat() {
               }
             : c
         ));
-      });
+      }, model);
     } catch (e) {
       console.error('Streaming error:', e);
       setConversations(prev => prev.map(c =>
-        c.id === (activeId || conversations[0].id)
+        c.id === currentConvId
           ? {
               ...c,
               messages: c.messages.map(m =>
@@ -71,7 +71,7 @@ export function useChat() {
     } finally {
       setLoading(false);
     }
-  }, [activeConversation, activeId, conversations]);
+  }, [activeConversation, activeId, conversations, model]);
 
-  return { conversations, activeConversation, setActiveId, newChat, sendUserMessage, loading };
+  return { conversations, activeConversation, setActiveId, newChat, sendUserMessage, loading, model, setModel };
 }
